@@ -3,70 +3,91 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Orbit Global Express - Shipment Portal</title>
+  <title>Staff Portal - Orbit Global Express</title>
   
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 
   <style>
     :root {
-      --primary: #004aad; --accent: #ffd700; --success: #28a745;
-      --bg-light: #f4f7f9; --text-dark: #2c3e50; --border: #e0e6ed;
-      --warning: #fff3cd; --warning-text: #856404;
+      --primary: #004aad;
+      --accent: #ffd700;
+      --success: #28a745;
+      --bg-light: #f4f7f9;
+      --text-dark: #2c3e50;
+      --border: #e0e6ed;
     }
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: var(--bg-light); color: var(--text-dark); line-height: 1.6; }
-    nav { background: var(--primary); padding: 1rem; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-    nav ul { list-style: none; display: flex; justify-content: center; gap: 2rem; align-items: center; }
-    nav a { color: white; text-decoration: none; font-weight: 600; }
-    header { background: linear-gradient(rgba(0, 74, 173, 0.7), rgba(0, 74, 173, 0.7)), url('https://images.unsplash.com/photo-1567808291548-fc3ee04dbcf0?auto=format&fit=crop&q=80&w=2070') center/cover no-repeat; color: white; text-align: center; padding: 120px 20px 80px; }
-    .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
-    section { margin-bottom: 50px; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
-    .un-seal { text-align: center; margin-bottom: 20px; }
-    .un-seal img { width: 100px; }
-    .un-seal p { font-size: 0.7rem; color: var(--primary); font-weight: bold; text-transform: uppercase; letter-spacing: 2px; margin-top: 5px; }
-    .status-alert { background: var(--warning); border: 1px solid #ffeeba; color: var(--warning-text); padding: 15px; border-radius: 10px; margin-bottom: 25px; text-align: center; font-weight: bold; }
-    .progress-bar-container { height: 8px; background: #eee; border-radius: 4px; margin-bottom: 40px; overflow: hidden; }
-    .progress-fill { height: 100%; background: var(--success); width: 0%; transition: width 1s ease-in-out; }
-    .step { display: flex; align-items: flex-start; position: relative; padding-bottom: 40px; }
-    .circle { width: 48px; height: 48px; border-radius: 50%; background: white; border: 3px solid var(--border); display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 20px; z-index: 2; }
-    .step.completed .circle { background: var(--success); color: white; border-color: var(--success); }
-    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; background: #fdfdfd; padding: 25px; border: 1px solid var(--border); border-radius: 15px; }
-    .info-item label { display: block; font-size: 0.7rem; color: #888; text-transform: uppercase; font-weight: bold; }
-    .info-item span { font-weight: 600; display: block; }
-    .hidden { display: none; }
-    input { padding: 14px; border: 2px solid var(--border); border-radius: 10px; width: 100%; margin-bottom: 10px; }
+
+    body { font-family: 'Segoe UI', sans-serif; background: var(--bg-light); color: var(--text-dark); padding: 20px; }
+    .container { max-width: 800px; margin: 0 auto; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+    h2 { color: var(--primary); text-align: center; margin-bottom: 30px; }
+    
+    input, textarea, select { padding: 14px; border: 2px solid var(--border); border-radius: 10px; width: 100%; margin-bottom: 15px; font-size: 1rem; }
+    label { font-weight: bold; display: block; margin-bottom: 5px; color: var(--primary); }
+    
+    .hold-section { background: #fff3cd; padding: 20px; border-radius: 10px; border: 1px solid #ffeeba; margin-bottom: 20px; }
+    
+    button { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
+    button:hover { background: #003580; }
+
+    .admin-card { background: #f9f9f9; padding: 15px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid var(--primary); }
+    .edit-btn { background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; margin-right: 5px; }
+    .delete-btn { background: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
   </style>
-  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-  <script type="text/javascript">function googleTranslateElementInit() { new google.translate.TranslateElement({pageLanguage: 'en'}, 'google_translate_element'); }</script>
 </head>
 <body>
-  <nav><ul><li><a href="#home">Home</a></li><li><a href="#track">Shipment Status</a></li><li id="google_translate_element"></li></ul></nav>
-  <header id="home"><h1>Orbit Global Express</h1><p>Secure Worldwide Logistics & Diplomatic Courier Services.</p></header>
-  <div class="container">
-    <section id="track">
-      <h2>Verify Shipment Status</h2>
-      <form id="track-form">
-        <input type="text" id="track-number" placeholder="Enter Shipment ID" required>
-        <button type="submit" style="width:100%; padding:16px; background:var(--primary); color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">Locate Shipment</button>
-      </form>
 
-      <div id="track-result" class="hidden" style="margin-top:30px;">
-        <div id="holdAlert" class="status-alert hidden"></div>
-        <div class="un-seal">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Flag_of_the_United_Nations.svg/1200px-Flag_of_the_United_Nations.svg.png">
-          <p>UN Diplomatic Service</p>
+  <div class="container">
+    <h2>Staff Manifest Portal</h2>
+    
+    <form id="add-form">
+      <label>Tracking ID</label>
+      <input type="text" id="add-number" placeholder="e.g., OGE-7744" required>
+
+      <div style="display:flex; gap:10px;">
+        <div style="flex:1;">
+          <label>Origin</label>
+          <input type="text" id="add-origin" placeholder="City, Country" required>
         </div>
-        <div class="progress-bar-container"><div class="progress-fill" id="main-progress"></div></div>
-        <div id="vertical-tracker" style="margin-bottom: 30px;"></div>
-        <div class="info-grid">
-          <div class="info-item"><label>Status</label><span id="current-status-text"></span></div>
-          <div class="info-item"><label>Current Facility</label><span id="current-loc"></span></div>
-          <div class="info-item" style="grid-column: span 2;"><label>Delivery Address</label><span id="display-address"></span></div>
+        <div style="flex:1;">
+          <label>Destination</label>
+          <input type="text" id="add-destination" placeholder="City, Country" required>
         </div>
       </div>
-      <p id="no-data" class="hidden" style="text-align:center; color:red; margin-top:20px;">Shipment ID not found.</p>
-    </section>
+
+      <label>Full Recipient Address</label>
+      <input type="text" id="add-address" placeholder="123 Diplomatic Way, New York" required>
+
+      <div style="display:flex; gap:10px;">
+        <div style="flex:1;">
+          <label>Customer Email</label>
+          <input type="email" id="add-email" placeholder="client@email.com" required>
+        </div>
+        <div style="flex:1;">
+          <label>Customer Phone</label>
+          <input type="tel" id="add-phone" placeholder="+1..." required>
+        </div>
+      </div>
+
+      <div class="hold-section">
+        <label>Shipment Progress Status</label>
+        <select id="hold-status">
+          <option value="false">Active (Moving Normally)</option>
+          <option value="true">On Hold (Pending Action)</option>
+        </select>
+        <label>Hold Reason (Only visible if On Hold)</label>
+        <input type="text" id="hold-reason" placeholder="e.g., Awaiting Diplomatic Clearance Fee">
+      </div>
+
+      <label>Route Manifest (History)</label>
+      <textarea id="add-route" placeholder="Format: Location - Hours - Icon&#10;London - 24 - 📦&#10;In Transit - 12 - 🚚" rows="6" required></textarea>
+      
+      <button type="submit" id="create-btn">Save Manifest</button>
+    </form>
+
+    <div id="shipment-list" style="margin-top:40px;">
+      <h3 style="border-bottom: 2px solid var(--border); padding-bottom: 10px;">Active Database</h3>
+    </div>
   </div>
 
   <script>
@@ -84,51 +105,87 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    document.getElementById('track-form').addEventListener('submit', e => {
-      e.preventDefault();
-      const num = document.getElementById('track-number').value.trim().toUpperCase();
-      
-      // Pull data from Cloud instead of LocalStorage
-      db.ref('shipments/' + num).once('value', snap => {
+    function renderAdminList() {
+      db.ref('shipments').on('value', (snap) => {
+        const data = snap.val() || {};
+        const list = document.getElementById('shipment-list');
+        list.innerHTML = '<h3 style="border-bottom: 2px solid var(--border); padding-bottom: 10px;">Active Database</h3>';
+        
+        Object.keys(data).forEach(num => {
+          const s = data[num];
+          const div = document.createElement('div');
+          div.className = 'admin-card';
+          div.innerHTML = `<div><strong>${num}</strong> <small>(${s.onHold ? '⛔ ON HOLD' : '✅ ACTIVE'})</small></div>
+                           <div><button class="edit-btn" onclick="editShipment('${num}')">Edit</button>
+                           <button class="delete-btn" onclick="deleteShipment('${num}')">Delete</button></div>`;
+          list.appendChild(div);
+        });
+      });
+    }
+
+    window.editShipment = function(num) {
+      db.ref('shipments/' + num).once('value', (snap) => {
         const s = snap.val();
-        const resultDiv = document.getElementById('track-result');
-        const noDataDiv = document.getElementById('no-data');
+        document.getElementById('add-number').value = num;
+        document.getElementById('add-origin').value = s.origin;
+        document.getElementById('add-destination').value = s.destination;
+        document.getElementById('add-address').value = s.address;
+        document.getElementById('add-email').value = s.email;
+        document.getElementById('add-phone').value = s.phone;
+        document.getElementById('hold-status').value = s.onHold ? "true" : "false";
+        document.getElementById('hold-reason').value = s.holdReason || "";
+        
+        const routeString = s.milestones.map(m => `${m.location} - ${m.hoursToNext} - ${m.icon}`).join('\n');
+        document.getElementById('add-route').value = routeString;
+        document.getElementById('create-btn').textContent = "Update Manifest";
+        window.scrollTo(0,0);
+      });
+    };
 
-        if (s) {
-          resultDiv.classList.remove('hidden');
-          noDataDiv.classList.add('hidden');
-          
-          const elapsed = (Date.now() - new Date(s.startTime).getTime()) / 3600000;
-          const alertDiv = document.getElementById('holdAlert');
-          const fill = document.getElementById('main-progress');
+    window.deleteShipment = function(num) { 
+      if(confirm('Are you sure you want to delete this shipment?')) { 
+        db.ref('shipments/' + num).remove();
+      } 
+    };
 
-          if (s.onHold) {
-            alertDiv.innerHTML = "⚠️ PENDING: " + (s.holdReason || "Contact Support");
-            alertDiv.classList.remove('hidden');
-            fill.style.width = "45%"; 
-            fill.style.background = "#d9534f";
-          } else {
-            alertDiv.classList.add('hidden');
-            fill.style.width = Math.min(100, (elapsed/s.totalTransitHours)*100) + '%';
-            fill.style.background = "var(--success)";
-          }
+    document.getElementById('add-form').addEventListener('submit', e => {
+      e.preventDefault();
+      const num = document.getElementById('add-number').value.trim().toUpperCase();
+      const routeText = document.getElementById('add-route').value;
+      const lines = routeText.trim().split('\n').filter(l => l.includes('-'));
+      
+      let total = 0;
+      const milestones = lines.map(line => {
+        const parts = line.split('-').map(p => p.trim());
+        const m = { location: parts[0], hoursToNext: parseFloat(parts[1]) || 0, icon: parts[2] || '📦', cumulativeHours: total };
+        total += m.hoursToNext;
+        return m;
+      });
 
-          document.getElementById('display-address').textContent = s.address;
-          document.getElementById('current-status-text').textContent = s.onHold ? "PENDING" : (elapsed >= s.totalTransitHours ? "DELIVERED" : "IN TRANSIT");
-          
-          // Current location logic
-          let currentIdx = 0;
-          for (let i = 0; i < s.milestones.length; i++) {
-            if (elapsed >= s.milestones[i].cumulativeHours) currentIdx = i;
-          }
-          document.getElementById('current-loc').textContent = s.milestones[currentIdx].location;
-
-        } else {
-          resultDiv.classList.add('hidden');
-          noDataDiv.classList.remove('hidden');
-        }
+      // Fetch existing start time if editing, otherwise new time
+      db.ref('shipments/' + num + '/startTime').once('value', (snap) => {
+        const startTime = snap.val() || new Date().toISOString();
+        
+        db.ref('shipments/' + num).set({
+          origin: document.getElementById('add-origin').value,
+          destination: document.getElementById('add-destination').value,
+          address: document.getElementById('add-address').value,
+          email: document.getElementById('add-email').value,
+          phone: document.getElementById('add-phone').value,
+          onHold: document.getElementById('hold-status').value === "true",
+          holdReason: document.getElementById('hold-reason').value,
+          milestones,
+          totalTransitHours: total,
+          startTime: startTime
+        }).then(() => {
+          alert("Manifest Successfully Saved to Cloud.");
+          e.target.reset();
+          document.getElementById('create-btn').textContent = "Create Manifest";
+        });
       });
     });
+
+    renderAdminList();
   </script>
 </body>
 </html>
