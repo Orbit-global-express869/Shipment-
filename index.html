@@ -3,63 +3,157 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Orbit Global Express - Tracking</title>
+  <title>Orbit Global Express - Global Delivery Solutions</title>
   <style>
-    :root { --primary: #004aad; --bg-light: #f4f7f9; --text-dark: #2c3e50; }
-    body { font-family: 'Segoe UI', sans-serif; background: var(--bg-light); color: var(--text-dark); margin:0; }
-    nav { background: var(--primary); padding: 1rem; text-align: center; }
-    nav a { color: white; text-decoration: none; font-weight: bold; font-size: 1.2rem; }
-    .container { max-width: 600px; margin: 40px auto; padding: 25px; background: white; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-top: 4px solid var(--primary); }
-    h2 { text-align: center; color: var(--primary); margin-bottom: 20px; }
-    input { width: 100%; padding: 15px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-    button { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; }
-    .status-alert { background: #fff3cd; color: #856404; padding: 15px; border-radius: 10px; margin: 20px 0; border: 1px solid #ffeeba; font-weight: bold; text-align: center; line-height: 1.4; }
+    :root {
+      --primary: #004aad;
+      --accent: #ffd700;
+      --success: #28a745;
+      --bg-light: #f4f7f9;
+      --text-dark: #2c3e50;
+      --border: #e0e6ed;
+      --warning: #fff3cd;
+      --warning-text: #856404;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: var(--bg-light); color: var(--text-dark); line-height: 1.6; }
+
+    /* --- NAVIGATION --- */
+    nav { background: var(--primary); padding: 1rem; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    nav ul { list-style: none; display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; }
+    nav a { color: white; text-decoration: none; font-weight: 600; font-size: 1rem; transition: 0.3s; }
+    nav a:hover { color: var(--accent); }
+
+    /* --- HEADER --- */
+    header {
+      background: linear-gradient(rgba(0, 74, 173, 0.7), rgba(0, 74, 173, 0.7)),
+                  url('https://images.unsplash.com/photo-1567808291548-fc3ee04dbcf0?auto=format&fit=crop&q=80&w=2070') center/cover no-repeat;
+      color: white; text-align: center; padding: 100px 20px 60px; background-attachment: fixed;
+    }
+    header h1 { font-size: 3rem; margin-bottom: 0.5rem; text-shadow: 2px 2px 8px rgba(0,0,0,0.5); }
+
+    .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+    section { margin-bottom: 50px; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+    h2 { color: var(--primary); text-align: center; margin-bottom: 30px; font-size: 2.2rem; }
+
+    /* --- FORMS --- */
+    form { display: flex; flex-direction: column; gap: 15px; max-width: 550px; margin: 0 auto; }
+    input { padding: 14px; font-size: 1rem; border: 2px solid var(--border); border-radius: 10px; transition: 0.3s; background: white; width: 100%; }
+    input:focus { border-color: var(--primary); outline: none; }
+    button { padding: 16px; font-size: 1.1rem; font-weight: bold; background: var(--primary); color: white; border: none; border-radius: 10px; cursor: pointer; transition: 0.3s; }
+    button:hover { background: #003580; transform: translateY(-2px); }
+
+    /* --- TRACKER UI --- */
+    .status-alert { background: var(--warning); border: 1px solid #ffeeba; color: var(--warning-text); padding: 15px; border-radius: 10px; margin-bottom: 25px; text-align: center; font-weight: bold; }
+    .tracker-box { margin-top: 40px; padding: 20px; border-top: 2px solid #f0f0f0; }
+    .progress-bar-container { height: 10px; background: #eee; border-radius: 5px; margin-bottom: 40px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--success); width: 0%; transition: width 1s ease-in-out; }
+
+    .step { display: flex; align-items: flex-start; position: relative; padding-bottom: 40px; }
+    .step::after { content: ""; position: absolute; left: 22px; top: 45px; bottom: 0; width: 4px; background: var(--border); z-index: 1; }
+    .step.completed::after { background: var(--success); }
+    .step:last-child::after { display: none; }
+
+    .circle { width: 48px; height: 48px; border-radius: 50%; background: white; border: 3px solid var(--border); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; margin-right: 20px; z-index: 2; position: relative; transition: 0.4s; }
+    .step.completed .circle { background: var(--success); border-color: var(--success); color: white; }
+    .step.current .circle { background: var(--primary); border-color: var(--primary); color: white; box-shadow: 0 0 0 10px rgba(0, 74, 173, 0.15); animation: pulse 2s infinite; }
+
+    .content p { margin: 0; font-weight: 700; font-size: 1.1rem; }
+    .content small { color: #666; font-size: 0.9rem; display: block; margin-top: 4px; }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(0, 74, 173, 0.6); }
+      70% { box-shadow: 0 0 0 15px rgba(0, 74, 173, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(0, 74, 173, 0); }
+    }
+
     .hidden { display: none; }
-    .progress-bar { height: 12px; background: #eee; border-radius: 6px; margin: 25px 0; overflow: hidden; }
-    .progress-fill { height: 100%; background: #28a745; width: 0%; transition: 1.5s ease; }
-    #details { line-height: 1.8; margin-top: 20px; }
+    footer { background: var(--primary); color: white; text-align: center; padding: 3rem; margin-top: 50px; }
   </style>
 </head>
 <body>
-  <nav><a href="#">ORBIT GLOBAL EXPRESS</a></nav>
-  <div class="container">
-    <h2>Shipment Tracking</h2>
-    <input type="text" id="trackInput" placeholder="Enter Tracking Number">
-    <button onclick="track()">Locate Package</button>
 
-    <div id="result" class="hidden">
-      <div id="holdAlert" class="status-alert hidden"></div>
-      <div class="progress-bar"><div id="fill" class="progress-fill"></div></div>
-      <div id="details"></div>
-    </div>
+  <nav>
+    <ul>
+      <li><a href="#home">Home</a></li>
+      <li><a href="#track">Track Shipment</a></li>
+    </ul>
+  </nav>
+
+  <header id="home">
+    <h1>Orbit Global Express</h1>
+    <p>Secure Worldwide Logistics & Diplomatic Courier Services.</p>
+  </header>
+
+  <div class="container">
+    <section id="track">
+      <h2>Shipment Tracking</h2>
+      <form id="track-form" onsubmit="event.preventDefault(); track();">
+        <input type="text" id="trackInput" placeholder="Enter Tracking Number" required>
+        <button type="submit">Locate Package</button>
+      </form>
+
+      <div id="track-result" class="hidden">
+        <div id="holdAlert" class="status-alert hidden"></div>
+        <div style="text-align:center; margin-bottom:30px;">
+            <h3 id="shipment-title" style="font-size:1.5rem; color:var(--primary);"></h3>
+            <p id="recipient-display" style="font-weight:bold; color:#555;"></p>
+        </div>
+        <div class="progress-bar-container"><div class="progress-fill" id="fill"></div></div>
+        <div class="tracker-box" id="vertical-tracker"></div>
+      </div>
+      <p id="no-data" class="hidden" style="text-align:center; color:#dc3545; font-weight:bold; margin-top:20px;">Tracking ID not found.</p>
+    </section>
   </div>
+
+  <footer>
+    <p>© 2026 Orbit Global Express | Private Diplomatic Network</p>
+  </footer>
 
   <script>
     function track() {
       const id = document.getElementById('trackInput').value.trim().toUpperCase();
       const shipments = JSON.parse(localStorage.getItem('shipments')) || {};
-      const resDiv = document.getElementById('result');
+      const resDiv = document.getElementById('track-result');
+      const noDataDiv = document.getElementById('no-data');
       const alertDiv = document.getElementById('holdAlert');
       const fill = document.getElementById('fill');
+      const tracker = document.getElementById('vertical-tracker');
 
       if (shipments[id]) {
         const s = shipments[id];
         resDiv.classList.remove('hidden');
+        noDataDiv.classList.add('hidden');
 
+        // Handle Hold Status
         if (s.onHold) {
-          alertDiv.innerHTML = "⚠️ SHIPMENT STATUS: PENDING<br><span style='font-size: 0.9em; font-weight: normal;'>" + s.holdReason + "</span>";
+          alertDiv.innerHTML = "⚠️ STATUS: PENDING<br>" + s.holdReason;
           alertDiv.classList.remove('hidden');
-          fill.style.width = "45%"; 
-          fill.style.background = "#d9534f"; // Turns Red for Pending
+          fill.style.width = "40%"; 
+          fill.style.background = "#d9534f"; 
         } else {
           alertDiv.classList.add('hidden');
           fill.style.width = "85%"; 
-          fill.style.background = "#28a745"; // Green for Active
+          fill.style.background = "#28a745"; 
         }
-        
-        document.getElementById('details').innerHTML = `<strong>Recipient:</strong> ${s.name}<br><strong>Manifest Details:</strong><br>${s.history.replace(/\n/g, "<br>")}`;
+
+        document.getElementById('shipment-title').textContent = "Tracking: " + id;
+        document.getElementById('recipient-display').textContent = "Recipient: " + s.name;
+
+        // Render Milestones
+        tracker.innerHTML = '';
+        const lines = s.history.split('\n');
+        lines.forEach((line, i) => {
+          if (!line.trim()) return;
+          const stepDiv = document.createElement('div');
+          stepDiv.className = 'step ' + (i < lines.length - 1 ? 'completed' : 'current');
+          stepDiv.innerHTML = `<div class="circle">${i+1}</div><div class="content"><p>${line}</p></div>`;
+          tracker.appendChild(stepDiv);
+        });
       } else {
-        alert("Tracking ID not found. Please verify the number.");
+        resDiv.classList.add('hidden');
+        noDataDiv.classList.remove('hidden');
       }
     }
   </script>
