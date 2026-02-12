@@ -9,7 +9,6 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 
   <style>
-    /* --- YOUR ORIGINAL THEME & STYLES --- */
     :root {
       --primary: #004aad;
       --accent: #ffd700;
@@ -26,7 +25,7 @@
 
     nav { background: var(--primary); padding: 1rem; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
     nav ul { list-style: none; display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; align-items: center; }
-    nav a { color: white; text-decoration: none; font-weight: 600; font-size: 1rem; transition: 0.3s; }
+    nav a { color: white; text-decoration: none; font-weight: 600; font-size: 1rem; transition: 0.3s; cursor: pointer; }
     nav a:hover { color: var(--accent); }
 
     header {
@@ -69,7 +68,6 @@
         animation: pulse-expand 2s infinite ease-in-out; 
     }
 
-    /* STATUS ALERT BOX */
     .status-alert { background: var(--warning); border: 1px solid #ffeeba; color: var(--warning-text); padding: 15px; border-radius: 10px; margin-bottom: 25px; text-align: center; font-weight: bold; }
 
     .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; background: #fdfdfd; padding: 25px; border: 1px solid var(--border); border-radius: 15px; margin-top: 20px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
@@ -86,7 +84,7 @@
     .footer-bottom { border-top: 1px solid rgba(255,255,255,0.1); margin-top: 40px; padding-top: 20px; text-align: center; font-size: 0.85rem; opacity: 0.7; }
 
     .hidden { display: none; }
-    input, textarea, select { padding: 14px; border: 2px solid var(--border); border-radius: 10px; width: 100%; margin-bottom: 10px; }
+    input { padding: 14px; border: 2px solid var(--border); border-radius: 10px; width: 100%; margin-bottom: 10px; }
   </style>
 
   <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
@@ -187,19 +185,21 @@
     document.getElementById('track-form').addEventListener('submit', e => {
       e.preventDefault();
       const num = document.getElementById('track-number').value.trim().toUpperCase();
+      const res = document.getElementById('track-result');
+      const noData = document.getElementById('no-data');
+
+      // Fetch from Firebase
       db.ref('shipments/' + num).once('value', (snapshot) => {
         const s = snapshot.val();
-        const res = document.getElementById('track-result');
-        const noData = document.getElementById('no-data');
-
         if (s) {
           const elapsed = (Date.now() - new Date(s.startTime).getTime()) / 3600000;
           noData.classList.add('hidden'); res.classList.remove('hidden');
           
           const alertBox = document.getElementById('hold-alert');
           const fill = document.getElementById('main-progress');
+          
           if(s.onHold) {
-              alertBox.innerHTML = `⚠️ <b>PENDING:</b> ${s.holdReason || 'Action Required'}`;
+              alertBox.innerHTML = `⚠️ <b>SHIPMENT PENDING:</b> ${s.holdReason || 'Please contact customer support.'}`;
               alertBox.classList.remove('hidden');
               fill.style.background = "#d9534f";
           } else {
@@ -215,19 +215,32 @@
           document.getElementById('display-phone').textContent = s.phone;
           document.getElementById('display-email').textContent = s.email;
           document.getElementById('display-address').textContent = s.address;
-          fill.style.width = s.onHold ? "45%" : Math.min(100, (elapsed/s.totalTransitHours)*100) + '%';
-          document.getElementById('current-status-text').textContent = s.onHold ? "ON HOLD" : (elapsed >= s.totalTransitHours ? "DELIVERED" : "DIPLOMATIC TRANSIT");
+          
+          const progressPercent = s.onHold ? 45 : Math.min(100, (elapsed/s.totalTransitHours)*100);
+          fill.style.width = progressPercent + '%';
+
+          document.getElementById('current-status-text').textContent = s.onHold ? "PENDING" : (elapsed >= s.totalTransitHours ? "DELIVERED" : "DIPLOMATIC TRANSIT");
           document.getElementById('current-loc').textContent = s.milestones[currentIdx].location;
+
+          // FIX: Estimated Arrival Calculation
+          if (elapsed >= s.totalTransitHours) {
+              document.getElementById('eta-display').textContent = "Delivered";
+          } else {
+              const remainingHours = s.totalTransitHours - elapsed;
+              const arrivalDate = new Date(Date.now() + (remainingHours * 3600000));
+              document.getElementById('eta-display').textContent = arrivalDate.toLocaleString();
+          }
 
           const tracker = document.getElementById('vertical-tracker');
           tracker.innerHTML = '';
           s.milestones.forEach((m, i) => {
             const step = document.createElement('div');
-            const isCompleted = elapsed >= (m.cumulativeHours + m.hoursToNext);
+            const isCompleted = elapsed >= (m.cumulativeHours + m.hoursToNext) || (elapsed >= s.totalTransitHours && i === s.milestones.length - 1);
             const isCurrent = (i === currentIdx && !isCompleted);
+            
             step.className = 'step ' + (isCompleted ? 'completed' : (isCurrent ? 'current' : 'pending'));
-            step.innerHTML = `<div class="circle">${isCompleted ? '✓' : m.icon}</div>
-                              <div class="content"><p>${m.location}</p></div>`;
+            step.innerHTML = `<div class=\"circle\">${isCompleted ? '✓' : (m.icon || '📦')}</div>
+                              <div class=\"content\"><p>${m.location}</p><small>${isCurrent ? 'Current Facility' : ''}</small></div>`;
             tracker.appendChild(step);
           });
         } else { res.classList.add('hidden'); noData.classList.remove('hidden'); }
